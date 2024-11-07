@@ -23,7 +23,7 @@ const Login = ({ navigation }: { navigation: any }) => {
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
-  const [userType, setUserType] = useState<"parent" | "professor" | "student" | "admin">("parent");
+  const [userType, setUserType] = useState<"parent" | "student">("parent");
 
   const handleLogin = async () => {
     console.log(email, password);
@@ -46,35 +46,29 @@ const Login = ({ navigation }: { navigation: any }) => {
     setLoading(true);
   
     try {
-      // If the user selects "admin", authenticate them as "professor"
-      const loginUserType = userType === "admin" ? "professor" : userType;
+      const loginUserType = userType;
   
       const loginFetch = await serviceAxiosApi.post(`auth/login`, {
         email: email,
         password: password,
-        userType: loginUserType, // Send professor type for login when admin is selected
+        userType: loginUserType, 
       });
   
-      console.log(loginFetch.data);
-      const access_token = loginFetch.data.accessToken;
-      const refresh_token = loginFetch.data.refreshToken;
+      console.log('login fetch data',loginFetch.data);
   
-      await AsyncStorage.setItem("accessToken", access_token);
-      await AsyncStorage.setItem("refreshToken", refresh_token);
-      await AsyncStorage.setItem("userType", loginUserType); // Save original user type
+      await AsyncStorage.setItem("accessToken", loginFetch.data.accessToken);
+      await AsyncStorage.setItem("refreshToken", loginFetch.data.refreshToken);
+      await AsyncStorage.setItem("userType", loginUserType);
   
       setMessage("Inicio de sesión exitoso");
   
       // Navigate based on user type
       if (userType === "parent") {
+        console.log('navegando a parent home');
         navigation.navigate("ParentHome");
-      } else if (userType === "professor") {
-        navigation.navigate("ProfessorHome");
       } else if (userType === "student") {
+        console.log('navegando a student home');
         navigation.navigate("StudentHome");
-      } else if (userType === "admin") {
-        // If the user selected admin, navigate to AdminHome
-        navigation.navigate("AdminHome");
       }
     } catch (error) {
       console.error("Error al realizar el inicio de sesión:", error);
@@ -139,16 +133,17 @@ const Login = ({ navigation }: { navigation: any }) => {
         {/* Añadir el Picker para seleccionar el tipo de usuario */}
         <View style={styles.inputContainer}>
           <Text style={styles.labelText}>Tipo de Usuario</Text>
-          <Picker
+            
+            <Picker
             selectedValue={userType}
             onValueChange={(itemValue) => setUserType(itemValue)}
             style={{ height: 50, width: '100%' }} 
-          >
+            >
             <Picker.Item label="Apoderado" value="parent" />
-            <Picker.Item label="Profesor" value="professor" />
+            {/* <Picker.Item label="Profesor" value="professor" />*/}
             <Picker.Item label="Estudiante" value="student" />
-            <Picker.Item label="Administración" value="admin" />
-          </Picker>
+            </Picker>
+            
         </View>
 
         <Button

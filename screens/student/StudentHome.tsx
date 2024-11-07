@@ -91,13 +91,18 @@ const StudentHome = ({ navigation }: { navigation: any }) => {
       <View style={styles.verticalButtonContainer}>
 
         {/* Botón Calificaciones */}
-        <TouchableOpacity onPress={() => navigation.navigate("Grades")} style={styles.editButton}>
+        <TouchableOpacity onPress={() => navigation.navigate("StudentGrades")} style={styles.editButton}>
           <Text style={{ fontSize: 16, color: COLORS.white }}>Calificaciones</Text>
         </TouchableOpacity>
 
         {/* Botón Asistencia */}
         <TouchableOpacity onPress={() => navigation.navigate("StudentAttendance")} style={styles.editButton}>
           <Text style={{ fontSize: 16, color: COLORS.white }}>Asistencia</Text>
+        </TouchableOpacity>
+
+        {/* Botón Horario */}
+        <TouchableOpacity onPress={() => navigation.navigate("StudentHorario")} style={styles.editButton}>
+          <Text style={{ fontSize: 16, color: COLORS.white }}>Horario</Text>
         </TouchableOpacity>
       </View>
 

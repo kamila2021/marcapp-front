@@ -21,6 +21,10 @@ import AdminSubject from './screens/admin/AdminSubject';
 import CreateSubject from './screens/admin/CreateSubject';
 import ParentAttendance from './screens/parent/ParentAttendance';
 import StudentAttendance from './screens/student/StudentAttendance';
+import ParentGrades from './screens/parent/ParentGrades';
+import StudentGrades from './screens/student/StudentGrades';
+import StudentHorario from './screens/student/StudentHorario';
+import ParentHorario from './screens/parent/ParentHorario';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -166,6 +170,34 @@ export default function App() {
         <Stack.Screen
           name="StudentAttendance"
           component={StudentAttendance}
+          options={{
+            headerShown: false
+          }}
+        />
+        <Stack.Screen
+          name="ParentGrades"
+          component={ParentGrades}
+          options={{
+            headerShown: false
+          }}
+        />
+        <Stack.Screen
+          name="StudentGrades"
+          component={StudentGrades}
+          options={{
+            headerShown: false
+          }}
+        />
+        <Stack.Screen
+          name="StudentHorario"
+          component={StudentHorario}
+          options={{
+            headerShown: false
+          }}
+        />
+        <Stack.Screen
+          name="ParentHorario"
+          component={ParentHorario}
           options={{
             headerShown: false
           }}

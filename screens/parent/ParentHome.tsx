@@ -96,13 +96,18 @@ const ParentHome = ({ navigation }: { navigation: any }) => {
         </TouchableOpacity>
 
         {/* Botón Calificaciones Pupilo */}
-        <TouchableOpacity onPress={() => navigation.navigate("Grades")} style={styles.editButton}>
+        <TouchableOpacity onPress={() => navigation.navigate("ParentGrades")} style={styles.editButton}>
           <Text style={{ fontSize: 16, color: COLORS.white }}>Calificaciones Pupilo(s)</Text>
         </TouchableOpacity>
 
         {/* Botón Asistencia */}
         <TouchableOpacity onPress={() => navigation.navigate("ParentAttendance")} style={styles.editButton}>
           <Text style={{ fontSize: 16, color: COLORS.white }}>Asistencia Pupilo(s)</Text>
+        </TouchableOpacity>
+
+        {/* Botón Asistencia */}
+        <TouchableOpacity onPress={() => navigation.navigate("ParentHorario")} style={styles.editButton}>
+          <Text style={{ fontSize: 16, color: COLORS.white }}>Horario Pupilo(s)</Text>
         </TouchableOpacity>
       </View>
 

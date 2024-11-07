@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Alert, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, Alert, Button } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import { serviceAxiosApi } from "../../services/serviceAxiosApi"; 
+import { serviceAxiosApi } from "../../services/serviceAxiosApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Icon from "react-native-vector-icons/MaterialIcons";  // Importa el ícono
+import Icon from 'react-native-vector-icons/FontAwesome';  
 
 const ParentAttendance = () => {
   const [students, setStudents] = useState<any[]>([]);
   const [selectedStudentId, setSelectedStudentId] = useState<number | undefined>(undefined);
   const [selectedStudentName, setSelectedStudentName] = useState<string>("");
   const [subjects, setSubjects] = useState<any[]>([]);
-  const [selectedSubjectId, setSelectedSubjectId] = useState<string | undefined>(undefined);
+  const [selectedSubjectId, setSelectedSubjectId] = useState<number | undefined>(undefined);
   const [attendanceRecords, setAttendanceRecords] = useState<any[]>([]);
+  const [attendancePercentage, setAttendancePercentage] = useState<number>(0);
 
   useEffect(() => {
     fetchStudents();
@@ -27,7 +28,7 @@ const ParentAttendance = () => {
     if (selectedStudentId && selectedSubjectId) {
       fetchAttendance();
     }
-  }, [selectedStudentId, selectedSubjectId]);
+  }, [selectedSubjectId]);
 
   const fetchStudents = async () => {
     const token = await AsyncStorage.getItem("accessToken");
@@ -38,8 +39,8 @@ const ParentAttendance = () => {
 
     try {
       const response = await serviceAxiosApi.get(`/parent/get-students/${token}`);
-      console.log("Students:", response.data);
       setStudents(response.data);
+      console.log("Estudiantes obtenidos:", response.data);
       if (response.data.length === 0) {
         Alert.alert("Error", "No tiene pupilos asignados.");
       }
@@ -50,19 +51,17 @@ const ParentAttendance = () => {
   };
 
   const fetchSubjects = async () => {
-    if (!selectedStudentId) return;
-    const selectedStudent = students.find((student) => student.id === selectedStudentId);
+    const selectedStudent = students.find((student) => student.id_student === selectedStudentId);
     if (!selectedStudent) return;
 
     try {
       const response = await serviceAxiosApi.get(`/subject`);
-      console.log("All Subjects:", response.data);
       const filteredSubjects = response.data.filter((subject) => subject.level === selectedStudent.level);
-      console.log("Filtered Subjects:", filteredSubjects);
+      setSubjects(filteredSubjects);
+      console.log("Materias filtradas:", filteredSubjects);
       if (filteredSubjects.length === 0) {
         Alert.alert("Error", "No hay materias disponibles para el nivel del pupilo.");
       }
-      setSubjects(filteredSubjects);
     } catch (error) {
       console.error("Error fetching subjects:", error);
       Alert.alert("Error", "No se pudo cargar la lista de materias.");
@@ -70,17 +69,21 @@ const ParentAttendance = () => {
   };
 
   const fetchAttendance = async () => {
-    if (!selectedSubjectId) return;
-
     try {
       const response = await serviceAxiosApi.get(`/attendance`);
-      console.log("All Attendance Records:", response.data);
-      const filteredAttendance = response.data.filter((record) => record.id_subject === parseInt(selectedSubjectId));
-      console.log("Attendance Records:", filteredAttendance);
+      const filteredAttendance = response.data.filter((record) => record.id_subject == selectedSubjectId);
       setAttendanceRecords(filteredAttendance);
+      console.log("Registros de asistencia filtrados:", filteredAttendance);
       if (filteredAttendance.length === 0) {
         Alert.alert("Error", "No hay registros de asistencia para la materia seleccionada.");
       }
+
+      const totalClasses = filteredAttendance.length;
+      const presentCount = filteredAttendance.filter((record) =>
+        isStudentPresent(record.students, selectedStudentId)
+      ).length;
+      const percentage = totalClasses > 0 ? (presentCount / totalClasses) * 100 : 0;
+      setAttendancePercentage(percentage);
     } catch (error) {
       console.error("Error fetching attendance:", error);
       Alert.alert("Error", "No se pudo cargar los registros de asistencia.");
@@ -88,92 +91,79 @@ const ParentAttendance = () => {
   };
 
   const handleStudentChange = (itemValue: number) => {
-    const selectedStudent = students.find((student) => student.id === itemValue);
-    if (selectedStudent) {
-      setSelectedStudentId(selectedStudent.id);
-      setSelectedStudentName(selectedStudent.name);
-      setSelectedSubjectId(undefined); // Reset selected subject
-      setAttendanceRecords([]); // Reset attendance records
-    }
+    setSelectedStudentId(itemValue);
+    setSelectedStudentName(students.find((student) => student.id_student === itemValue)?.name || "");
+    setSelectedSubjectId(undefined);
+    setAttendanceRecords([]);
+    setAttendancePercentage(0);
   };
 
-  const handleSubjectChange = (itemValue: string) => {
+  const handleSubjectChange = (itemValue: number) => {
     setSelectedSubjectId(itemValue);
+    console.log("Materia seleccionada ID:", itemValue);
   };
 
   const isStudentPresent = (students: number[], studentId: number) => {
     return students.includes(studentId);
   };
 
-  // Muestra la alerta para la justificación de inasistencias
-  const handleJustifyAbsence = () => {
-    Alert.alert(
-      "Justificación en desarrollo",
-      "La funcionalidad para justificar las inasistencias estará disponible próximamente.",
-      [{ text: "Entendido" }]
-    );
+  const handleJustification = () => {
+    Alert.alert("En desarrollo", "La funcionalidad de justificación está en desarrollo.");
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Selecciona un Pupilo</Text>
-      <Picker
-        selectedValue={selectedStudentId}
-        onValueChange={handleStudentChange}
-        style={styles.picker}
-      >
+      <Picker selectedValue={selectedStudentId} onValueChange={handleStudentChange} style={styles.picker}>
         <Picker.Item label="Seleccione un pupilo" value={undefined} />
         {students.map((student) => (
-          <Picker.Item
-            key={student.id}
-            label={`${student.name} (Nivel ${student.level})`}
-            value={student.id}
-          />
+          <Picker.Item key={student.id_student} label={`${student.name} (Nivel ${student.level})`} value={student.id_student} />
         ))}
       </Picker>
-
-      {selectedStudentId && (
-        <View style={styles.selectedStudentContainer}>
-          <Text style={styles.selectedStudentText}>
-            Pupilo seleccionado: {selectedStudentName} (Nivel {students.find((s) => s.id === selectedStudentId)?.level})
-          </Text>
-        </View>
-      )}
 
       {subjects.length > 0 && (
         <>
           <Text style={styles.title}>Selecciona una Materia</Text>
-          <Picker
-            selectedValue={selectedSubjectId}
-            onValueChange={handleSubjectChange}
-            style={styles.picker}
-          >
+          <Picker selectedValue={selectedSubjectId} onValueChange={handleSubjectChange} style={styles.picker}>
             <Picker.Item label="Seleccione una materia" value={undefined} />
             {subjects.map((subject) => (
-              <Picker.Item
-                key={subject.id}
-                label={`${subject.name} (Nivel ${subject.level})`}
-                value={subject.id}
-              />
+              <Picker.Item key={subject.id_subject} label={`${subject.name} (Nivel ${subject.level})`} value={subject.id_subject} />
             ))}
           </Picker>
         </>
       )}
 
-      {attendanceRecords.length > 0 && selectedStudentId && selectedSubjectId && (
+      {attendanceRecords.length > 0 && (
         <View style={styles.attendanceContainer}>
-          <Text style={styles.attendanceTitle}>Registro de Asistencia:</Text>
+          <Text style={styles.attendanceTitle}>Asistencia para {selectedStudentName}</Text>
+          <Text style={styles.percentageText}>Porcentaje de asistencia: {attendancePercentage.toFixed(2)}%</Text>
+
           {attendanceRecords.map((record) => {
-            const present = isStudentPresent(record.students, selectedStudentId);
+            const studentPresent = isStudentPresent(record.students, selectedStudentId);
             return (
-              <View key={record._id} style={styles.attendanceRow}>
-                <Text style={[styles.attendanceText, present ? styles.present : styles.absent]}>
-                  Fecha: {new Date(record.date).toLocaleDateString()} - {present ? "Presente" : "Ausente"}
+              <View key={record.id_attendance} style={styles.recordContainer}>
+                <Text
+                  style={[styles.dateText, { color: studentPresent ? "green" : "red" }]}
+                >
+                  {formatDate(record.date)} - {studentPresent ? "Presente" : "Ausente"}
                 </Text>
-                {!present && (
-                  <TouchableOpacity onPress={handleJustifyAbsence}>
-                    <Icon name="edit" size={24} color="gray" style={styles.justifyIcon} />
-                  </TouchableOpacity>
+
+                {!studentPresent && (
+                  <Icon
+                  name="pencil" 
+                  size={15} 
+                  color="blue" 
+                  onPress={handleJustification} 
+
+                  />
                 )}
               </View>
             );
@@ -199,16 +189,6 @@ const styles = StyleSheet.create({
     height: 50,
     width: "100%",
   },
-  selectedStudentContainer: {
-    marginTop: 20,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-  },
-  selectedStudentText: {
-    fontSize: 16,
-  },
   attendanceContainer: {
     marginTop: 20,
   },
@@ -217,23 +197,25 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     textAlign: "center",
   },
-  attendanceRow: {
+  percentageText: {
+    marginTop: 20,
+    fontSize: 18,
+    textAlign: "center",
+    color: "#333",
+  },
+  recordContainer: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: "#f9f9f9",
+    borderRadius: 5,
+    marginBottom: 10,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  attendanceText: {
-    fontSize: 16,
-    marginVertical: 5,
-  },
-  present: {
-    color: "green",
-  },
-  absent: {
-    color: "red",
-  },
-  justifyIcon: {
-    marginLeft: 10,
+  dateText: {
+    fontSize: 18,
+    textAlign: "center",
   },
 });
 
