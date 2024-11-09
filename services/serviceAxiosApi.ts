@@ -2,10 +2,10 @@ import axios from 'axios';
 import { API_BASE_URL } from '@env';
 
 
-const API_URL = 'http://192.168.1.108:3000/';
+console.log('API BASE URL:', API_BASE_URL);
 
 const serviceAxiosApi = axios.create({
-  baseURL: API_URL,
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
