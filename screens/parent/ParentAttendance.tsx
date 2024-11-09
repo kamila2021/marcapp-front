@@ -149,7 +149,7 @@ const ParentAttendance = () => {
           {attendanceRecords.map((record) => {
             const studentPresent = isStudentPresent(record.students, selectedStudentId);
             return (
-              <View key={record.id_attendance} style={styles.recordContainer}>
+              <View key={record._id} style={styles.recordContainer}>
                 <Text
                   style={[styles.dateText, { color: studentPresent ? "green" : "red" }]}
                 >

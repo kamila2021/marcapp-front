@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator, Alert, StyleSheet } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { serviceAxiosApi } from '../../services/serviceAxiosApi';
 
@@ -11,8 +10,11 @@ const StudentHorario = () => {
     const [subjects, setSubjects] = useState([]);
     const [loadingSubjects, setLoadingSubjects] = useState(true);
     const [errorSubjects, setErrorSubjects] = useState(null);
-    const [selectedLevel, setSelectedLevel] = useState('');
     const [studentLevel, setStudentLevel] = useState('');
+
+    // Días de la semana y orden de bloques
+    const daysOfWeek = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes'];
+    const blocksOrder = ['A', 'B', 'C', 'D', 'E'];
 
     useEffect(() => {
         const fetchStudent = async () => {
@@ -40,6 +42,7 @@ const StudentHorario = () => {
                 setLoadingSubjects(true);
                 const response = await serviceAxiosApi.get('/subject');
                 const filteredSubjects = response.data.filter(subject => subject.level === level);
+                console.log('Materias:', filteredSubjects);
                 setSubjects(filteredSubjects);
             } catch (err) {
                 console.error(err);
@@ -51,13 +54,6 @@ const StudentHorario = () => {
 
         fetchStudent();
     }, []);
-
-    const handleLevelChange = (itemValue) => {
-        setSelectedLevel(itemValue);
-        if (itemValue) {
-            Alert.alert('Buscando horario del estudiante');
-        }
-    };
 
     if (loading) {
         return <ActivityIndicator size="large" color="#0000ff" />;
@@ -77,7 +73,14 @@ const StudentHorario = () => {
         return null;
     }
 
-    const filteredSubjects = subjects.filter(subject => subject.level === studentLevel);
+    // Organizar materias por día y ordenar por bloque
+    const organizedSubjects = daysOfWeek.map(day => {
+        const subjectsForDay = subjects
+            .filter(subject => subject.day === day)
+            .sort((a, b) => blocksOrder.indexOf(a.block) - blocksOrder.indexOf(b.block));
+        console.log('Materias para', day, subjectsForDay);
+        return { day, subjects: subjectsForDay };
+    });
 
     return (
         <View style={styles.container}>
@@ -90,17 +93,22 @@ const StudentHorario = () => {
             </View>
 
             <Text style={styles.title}>Horario</Text>
-            {filteredSubjects.length > 0 ? (
-                filteredSubjects.map((subject) => (
-                    <View key={subject.id_subject} style={styles.subjectContainer}>
-                        <Text style={styles.subjectText}>
-                            {subject.name} - {subject.day} - {subject.block}
-                        </Text>
-                    </View>
-                ))
-            ) : (
-                <Text style={styles.errorText}>No hay materias para este nivel.</Text>
-            )}
+            {organizedSubjects.map(({ day, subjects }) => (
+                <View key={day} style={styles.dayContainer}>
+                    <Text style={styles.dayTitle}>{day}</Text>
+                    {subjects.length > 0 ? (
+                        subjects.map(subject => (
+                            <View key={subject.id_subject} style={styles.subjectContainer}>
+                                <Text style={styles.subjectText}>
+                                    {subject.name} - Bloque {subject.block}
+                                </Text>
+                            </View>
+                        ))
+                    ) : (
+                        <Text style={styles.noSubjectsText}>No hay horario para este día.</Text>
+                    )}
+                </View>
+            ))}
         </View>
     );
 };
@@ -127,6 +135,14 @@ const styles = StyleSheet.create({
     studentText: {
         fontSize: 16,
     },
+    dayContainer: {
+        marginBottom: 15,
+    },
+    dayTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 5,
+    },
     subjectContainer: {
         padding: 10,
         borderWidth: 1,
@@ -137,9 +153,9 @@ const styles = StyleSheet.create({
     subjectText: {
         fontSize: 16,
     },
-    errorText: {
+    noSubjectsText: {
         fontSize: 16,
-        color: 'red',
+        color: 'gray',
         textAlign: 'center',
     },
 });
