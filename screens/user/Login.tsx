@@ -71,10 +71,10 @@ const Login = ({ navigation }: { navigation: any }) => {
         navigation.navigate("StudentHome");
       }
     } catch (error) {
-      console.error("Error al realizar el inicio de sesión:", error);
+      console.error("Error al realizar el inicio de sesión:", error.message);
       Alert.alert(
         "Error",
-        "Ocurrió un error al iniciar sesión. Por favor, intenta de nuevo más tarde"
+        "Email o contraseña incorrectos. Por favor, inténtelo de nuevo."
       );
     } finally {
       setLoading(false);

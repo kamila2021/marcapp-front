@@ -3,8 +3,8 @@ import { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, FlatList } from 'react-native';
 import socket, { joinChat, sendMessage } from '../../services/socketService';
 
-const ChatWithProfessor = ({ route }) => {
-  const { userId, receiverId } = route.params;
+const ChatWithProfessor = ({ navigation }: { navigation: any }) => {
+  const { userId, receiverId } = navigation.params;
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
 
