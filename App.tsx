@@ -25,6 +25,8 @@ import ParentGrades from './screens/parent/ParentGrades';
 import StudentGrades from './screens/student/StudentGrades';
 import StudentHorario from './screens/student/StudentHorario';
 import ParentHorario from './screens/parent/ParentHorario';
+import ParentChildrenList from './screens/parent/ParentChildrenList';
+import ChatWithProfessor from './screens/chat/ChatWithProfessor';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -198,6 +200,20 @@ export default function App() {
         <Stack.Screen
           name="ParentHorario"
           component={ParentHorario}
+          options={{
+            headerShown: false
+          }}
+        />
+        <Stack.Screen
+          name="ParentChildrenList"
+          component={ParentChildrenList}
+          options={{
+            headerShown: false
+          }}
+        />
+        <Stack.Screen
+          name="ChatWithProfessor"
+          component={ChatWithProfessor}
           options={{
             headerShown: false
           }}

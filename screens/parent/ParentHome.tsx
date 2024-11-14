@@ -112,7 +112,7 @@ const ParentHome = ({ navigation }: { navigation: any }) => {
 
         {/* Botón Chat */}
         <TouchableOpacity 
-          onPress={() => navigation.navigate("ParentChildrenList", { userId: user?.accessToken })} 
+          onPress={() => navigation.navigate("ParentChildrenList")} 
           style={styles.editButton}
         >
           <Text style={{ fontSize: 16, color: COLORS.white }}>Chat</Text>
