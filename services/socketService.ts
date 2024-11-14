@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 
-// Cambia la URL por la IP o dominio de tu backend si es necesario
+// Cambia '192.168.X.X' por la IP de tu backend o dominio, y asegúrate de que el puerto sea el correcto
 const socket = io('http://192.168.X.X:3000', { transports: ['websocket'] });
 
 export const joinChat = (userId: string) => {
