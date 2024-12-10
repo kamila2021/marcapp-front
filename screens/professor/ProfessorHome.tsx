@@ -26,10 +26,12 @@ const ProfessorHome = ({ navigation }: { navigation: any }) => {
   const [error, setError] = useState("");
 
   const fetchProfile = async () => {
-    setLoading(true);
     const access_Token = await AsyncStorage.getItem("accessToken");
-    if (!access_Token) {
-      setError("No token found");
+    console.log('access token obtenido de async storage', access_Token);
+    const id = await AsyncStorage.getItem("id");
+    console.log('id obtenido de async storage',id);
+    if (!access_Token||!id) {
+      setError("No token or id found");
       setLoading(false);
       return;
     }
@@ -66,10 +68,6 @@ const ProfessorHome = ({ navigation }: { navigation: any }) => {
     fetchProfile();
   };
 
-  const handleAccountingAlert = () => {
-    Alert.alert("Próximamente. en desarrollo", "Esta funcionalidad estará disponible pronto.");
-  };
-
   if (loading) {
     return <ActivityIndicator size="large" color={COLORS.primary} />;
   }
@@ -91,14 +89,10 @@ const ProfessorHome = ({ navigation }: { navigation: any }) => {
       <View style={styles.verticalButtonContainer}>
 
         {/* Botón Calificaciones */}
-        <TouchableOpacity onPress={() => navigation.navigate("Grades")} style={styles.editButton}>
-          <Text style={{ fontSize: 16, color: COLORS.white }}>Calificaciones</Text>
+        <TouchableOpacity onPress={() => navigation.navigate("ProfessorChat")} style={styles.editButton}>
+          <Text style={{ fontSize: 16, color: COLORS.white }}>Chat</Text>
         </TouchableOpacity>
 
-        {/* Botón Asistencia */}
-        <TouchableOpacity onPress={() => navigation.navigate("Attendance")} style={styles.editButton}>
-          <Text style={{ fontSize: 16, color: COLORS.white }}>Asistencia</Text>
-        </TouchableOpacity>
       </View>
 
       {/* Contenedor para los botones en la parte inferior */}

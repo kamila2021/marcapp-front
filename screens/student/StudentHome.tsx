@@ -28,8 +28,11 @@ const StudentHome = ({ navigation }: { navigation: any }) => {
   const fetchProfile = async () => {
     setLoading(true);
     const access_Token = await AsyncStorage.getItem("accessToken");
-    if (!access_Token) {
-      setError("No token found");
+    console.log('access token: obtenido de async storage',access_Token);
+    const id = await AsyncStorage.getItem("id");
+    console.log('id obtenido de async storage',id);
+    if (!access_Token||!id) {
+      setError("No token or id found");
       setLoading(false);
       return;
     }
@@ -108,9 +111,9 @@ const StudentHome = ({ navigation }: { navigation: any }) => {
 
       {/* Contenedor para los botones en la parte inferior */}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity onPress={handleReload} style={styles.simpleButton}>
+        {/* <TouchableOpacity onPress={handleReload} style={styles.simpleButton}>
           <Text style={{ fontSize: 16, color: COLORS.primary }}>Recargar</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <TouchableOpacity onPress={handleLogout} style={styles.simpleButton}>
           <Text style={{ fontSize: 16, color: COLORS.primary }}>Cerrar Sesión</Text>
         </TouchableOpacity>

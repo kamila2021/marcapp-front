@@ -121,9 +121,9 @@ const ParentHome = ({ navigation }: { navigation: any }) => {
 
       {/* Contenedor para los botones en la parte inferior */}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity onPress={handleReload} style={styles.simpleButton}>
+        {/* <TouchableOpacity onPress={handleReload} style={styles.simpleButton}>
           <Text style={{ fontSize: 16, color: COLORS.primary }}>Recargar</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <TouchableOpacity onPress={handleLogout} style={styles.simpleButton}>
           <Text style={{ fontSize: 16, color: COLORS.primary }}>Cerrar Sesión</Text>
         </TouchableOpacity>

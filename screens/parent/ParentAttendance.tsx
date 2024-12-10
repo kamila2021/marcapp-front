@@ -20,7 +20,8 @@ const ParentAttendance = () => {
 
   useEffect(() => {
     if (selectedStudentId) {
-      fetchSubjects();
+      console.log("Pupilo seleccionado ID:", selectedStudentId);
+      fetchSubjects(selectedStudentId);
     }
   }, [selectedStudentId]);
 
@@ -50,21 +51,17 @@ const ParentAttendance = () => {
     }
   };
 
-  const fetchSubjects = async () => {
-    const selectedStudent = students.find((student) => student.id_student === selectedStudentId);
-    if (!selectedStudent) return;
-
+  const fetchSubjects = async (selectedStudentId) => {
+    
     try {
-      const response = await serviceAxiosApi.get(`/subject`);
-      const filteredSubjects = response.data.filter((subject) => subject.level === selectedStudent.level);
-      setSubjects(filteredSubjects);
-      console.log("Materias filtradas:", filteredSubjects);
-      if (filteredSubjects.length === 0) {
+      const response = await serviceAxiosApi.get(`/subject/subjects/${selectedStudentId}`);
+      console.log("Materias obtenidas:", response.data);
+      setSubjects(response.data);
+      if (response.data.length === 0) {
         Alert.alert("Error", "No hay materias disponibles para el nivel del pupilo.");
       }
     } catch (error) {
-      console.error("Error fetching subjects:", error);
-      Alert.alert("Error", "No se pudo cargar la lista de materias.");
+      Alert.alert("Error", "No hay materias disponibles para el pupilo.");
     }
   };
 
@@ -92,7 +89,7 @@ const ParentAttendance = () => {
 
   const handleStudentChange = (itemValue: number) => {
     setSelectedStudentId(itemValue);
-    setSelectedStudentName(students.find((student) => student.id_student === itemValue)?.name || "");
+    setSelectedStudentName(students.find((student) => student.id === itemValue)?.name || "");
     setSelectedSubjectId(undefined);
     setAttendanceRecords([]);
     setAttendancePercentage(0);
@@ -125,7 +122,7 @@ const ParentAttendance = () => {
       <Picker selectedValue={selectedStudentId} onValueChange={handleStudentChange} style={styles.picker}>
         <Picker.Item label="Seleccione un pupilo" value={undefined} />
         {students.map((student) => (
-          <Picker.Item key={student.id_student} label={`${student.name} (Nivel ${student.level})`} value={student.id_student} />
+          <Picker.Item key={student.id} label={`${student.name} (Nivel ${student.level})`} value={student.id} />
         ))}
       </Picker>
 
@@ -135,7 +132,7 @@ const ParentAttendance = () => {
           <Picker selectedValue={selectedSubjectId} onValueChange={handleSubjectChange} style={styles.picker}>
             <Picker.Item label="Seleccione una materia" value={undefined} />
             {subjects.map((subject) => (
-              <Picker.Item key={subject.id_subject} label={`${subject.name} (Nivel ${subject.level})`} value={subject.id_subject} />
+              <Picker.Item key={subject.id_subject} label={`${subject.name}`} value={subject.id_subject} />
             ))}
           </Picker>
         </>
@@ -143,7 +140,7 @@ const ParentAttendance = () => {
 
       {attendanceRecords.length > 0 && (
         <View style={styles.attendanceContainer}>
-          <Text style={styles.attendanceTitle}>Asistencia para {selectedStudentName}</Text>
+          <Text style={styles.attendanceTitle}>Asistencia de {selectedStudentName}</Text>
           <Text style={styles.percentageText}>Porcentaje de asistencia: {attendancePercentage.toFixed(2)}%</Text>
 
           {attendanceRecords.map((record) => {

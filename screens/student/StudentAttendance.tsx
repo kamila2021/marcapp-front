@@ -21,11 +21,11 @@ const StudentAttendance = ({ studentId }) => {
         const fetchStudent = async () => {
             try {
                 const token = await AsyncStorage.getItem('accessToken');
-                const response = await serviceAxiosApi.get('/student');
-                const studentData = response.data.find(student => student.access_token === token);
+                const studentData = await serviceAxiosApi.get(`/student/${token}`);
+                console.log('studentData',studentData.data);
                 if (studentData) {
-                    setStudent(studentData);
-                    await fetchSubjects(studentData.level);
+                    setStudent(studentData.data);
+                    await fetchSubjects(studentData.data.level);
                 } else {
                     setError('Estudiante no encontrado');
                 }
@@ -156,7 +156,7 @@ const StudentAttendance = ({ studentId }) => {
                             <Text style={styles.attendancePercentage}>Porcentaje de asistencia: {attendancePercentage}%</Text>
                         </>
                     ) : (
-                        <Text style={styles.errorText}>No hay asistencias para esta materia.</Text>
+                        <Text style={styles.errorText}>No hay registros de asistencia para esta materia.</Text>
                     )}
                 </View>
             )}

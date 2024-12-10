@@ -23,7 +23,7 @@ const Login = ({ navigation }: { navigation: any }) => {
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
-  const [userType, setUserType] = useState<"parent" | "student">("parent");
+  const [userType, setUserType] = useState<"parent" | "student"|"professor">("parent");
 
   const handleLogin = async () => {
     console.log(email, password);
@@ -59,6 +59,7 @@ const Login = ({ navigation }: { navigation: any }) => {
       await AsyncStorage.setItem("accessToken", loginFetch.data.accessToken);
       await AsyncStorage.setItem("refreshToken", loginFetch.data.refreshToken);
       await AsyncStorage.setItem("userType", loginUserType);
+      await AsyncStorage.setItem("id", loginFetch.data.id.toString());
   
       setMessage("Inicio de sesión exitoso");
   
@@ -69,7 +70,11 @@ const Login = ({ navigation }: { navigation: any }) => {
       } else if (userType === "student") {
         console.log('navegando a student home');
         navigation.navigate("StudentHome");
+      } else if (userType === "professor"){
+        console.log('navegando a professor home');
+        navigation.navigate("ProfessorHome");
       }
+
     } catch (error) {
       console.error("Error al realizar el inicio de sesión:", error.message);
       Alert.alert(
@@ -140,7 +145,7 @@ const Login = ({ navigation }: { navigation: any }) => {
             style={{ height: 50, width: '100%' }} 
             >
             <Picker.Item label="Apoderado" value="parent" />
-            {/* <Picker.Item label="Profesor" value="professor" />*/}
+            <Picker.Item label="Profesor" value="professor" />
             <Picker.Item label="Estudiante" value="student" />
             </Picker>
             

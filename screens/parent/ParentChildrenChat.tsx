@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Alert, ActivityIndicator, TextInput, Button, FlatList } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import socket, { joinChat, sendMessage } from '../../services/socketService';
+import socket, { joinRoom, leaveRoom, fetchMessages, sendMessage } from '../../services/socketService';
 import { serviceAxiosApi } from '../../services/serviceAxiosApi';
 
 const ParentChildrenChat = () => {
@@ -11,14 +11,15 @@ const ParentChildrenChat = () => {
   const [selectedChildName, setSelectedChildName] = useState('');
   const [subjects, setSubjects] = useState([]);
   const [selectedProfessor, setSelectedProfessor] = useState(undefined);
+  const [selectedSubject, setSelectedSubject] = useState(undefined);
   const [loadingProfessors, setLoadingProfessors] = useState(false);
   const [errorProfessors, setErrorProfessors] = useState(null);
+  const [room, setRoom] = useState(null);
 
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
-    console.log("Fetching children list...");
     const fetchChildren = async () => {
       const token = await AsyncStorage.getItem("accessToken");
       if (!token) {
@@ -26,9 +27,7 @@ const ParentChildrenChat = () => {
         return;
       }
       try {
-        console.log("Sending request to fetch children...");
         const response = await serviceAxiosApi.get(`/parent/get-students/${token}`);
-        console.log("Received response:", response.data);
         setChildren(response.data);
         if (response.data.length === 0) {
           Alert.alert("Error", "No tiene hijos asignados.");
@@ -42,26 +41,50 @@ const ParentChildrenChat = () => {
   }, []);
 
   useEffect(() => {
-    if (selectedChildId && selectedProfessor) {
-      console.log(`Joining chat room for child ID: ${selectedChildId}`);
-      joinChat(selectedChildId);
-      socket.on('receiveMessage', (data) => {
-        console.log("Received message:", data);
-        const { message, senderId } = data;
-        setMessages((prevMessages) => [...prevMessages, { message, senderId }]);
-      });
+    if (selectedChildId && selectedProfessor && selectedSubject) {
+      const newRoom = `${selectedChildId}-${selectedProfessor}-${selectedSubject}`;
+      setRoom(newRoom);
+    }
+  }, [selectedChildId, selectedProfessor, selectedSubject]);
+
+  useEffect(() => {
+    if (room) {
+      joinRoom(room);
+      fetchRoomMessages(room);
+
+      // Limpieza al desmontar o cambiar de sala
       return () => {
-        console.log("Cleaning up socket event for receiveMessage");
-        socket.off('receiveMessage');
+        leaveRoom(room);
+        socket.off("newMessage");
       };
     }
-  }, [selectedChildId, selectedProfessor]);
+  }, [room]);
+
+  const fetchRoomMessages = (room) => {
+    fetchMessages(room, (fetchedMessages) => {
+      const normalizedMessages = fetchedMessages.map((msg) => ({
+        message: msg.content,
+        senderId: msg.sender,
+        createdAt: msg.createdAt,
+      }));
+      setMessages(normalizedMessages);
+    });
+
+    socket.on("newMessage", (newMessage) => {
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          message: newMessage.content,
+          senderId: newMessage.sender,
+          createdAt: newMessage.createdAt,
+        },
+      ]);
+    });
+  };
 
   const handleChildChange = (itemValue) => {
-    console.log("Child selected:", itemValue);
     const selectedChild = children.find((child) => child.id === itemValue);
     if (selectedChild) {
-      console.log(`Selected child details: ID - ${selectedChild.id}, Name - ${selectedChild.name}`);
       setSelectedChildId(selectedChild.id);
       setSelectedChildName(selectedChild.name);
       fetchProfessors(selectedChild.level);
@@ -69,27 +92,13 @@ const ParentChildrenChat = () => {
   };
 
   const fetchProfessors = async (level) => {
-    console.log("Fetching professors for level:", level);
     setLoadingProfessors(true);
     setErrorProfessors(null);
     try {
       const response = await serviceAxiosApi.get(`/subject`);
-      console.log("Professors response:", response.data);
-      const filteredResponse = response.data
-        .filter((subject) => subject.level === level)
-        .reduce((uniqueProfessors, subject) => {
-          const exists = uniqueProfessors.some(
-            (item) => item.professor_id === subject.professor_id
-          );
-          if (!exists) {
-            uniqueProfessors.push(subject);
-          }
-          return uniqueProfessors;
-        }, []);
-      console.log("Filtered professors list:", filteredResponse);
+      const filteredResponse = response.data.filter((subject) => subject.level == level);
       setSubjects(filteredResponse);
     } catch (error) {
-      console.error("Error fetching professors:", error);
       setErrorProfessors("No se pudo cargar la lista de profesores.");
     } finally {
       setLoadingProfessors(false);
@@ -97,13 +106,9 @@ const ParentChildrenChat = () => {
   };
 
   const handleSendMessage = () => {
-    if (message.trim()) {
-      console.log("Sending message:", message);
-      sendMessage(message, selectedChildId, selectedProfessor);
-      setMessages((prevMessages) => [...prevMessages, { message, senderId: selectedChildId }]);
-      setMessage(''); // Limpiar el campo de entrada
-    } else {
-      console.log("Empty message, not sending.");
+    if (message.trim() && room) {
+      sendMessage(message, room, selectedChildId || 'unknown');
+      setMessage('');
     }
   };
 
@@ -131,17 +136,17 @@ const ParentChildrenChat = () => {
           <Picker
             selectedValue={selectedProfessor}
             onValueChange={(itemValue) => {
-              console.log("Professor selected:", itemValue);
-              setSelectedProfessor(itemValue);
+              setSelectedProfessor(itemValue.professor.id);
+              setSelectedSubject(itemValue.id_subject);
             }}
             style={styles.picker}
           >
             <Picker.Item label="Seleccione un Profesor" value={undefined} />
             {subjects.map((subject) => (
               <Picker.Item
-                key={subject.professor_id}
-                label={`${subject.professor_name} - ${subject.name}`}
-                value={subject.professor_id}
+                key={subject.professor.id}
+                label={`${subject.professor.name} - ${subject.name}`}
+                value={subject}
               />
             ))}
           </Picker>
@@ -155,9 +160,9 @@ const ParentChildrenChat = () => {
           <FlatList
             data={messages}
             renderItem={({ item }) => (
-              <Text style={{ color: item.senderId === selectedChildId ? 'blue' : 'green' }}>
-                {item.message}
-              </Text>
+                <Text style={{ color: item.senderId == selectedChildId ? 'blue' : 'green' }}>
+                {item.message} - {new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </Text>
             )}
             keyExtractor={(item, index) => index.toString()}
           />
