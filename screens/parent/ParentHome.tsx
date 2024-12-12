@@ -5,6 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import COLORS from "../../constants/colors";
 import styles from "../../assets/styles/HomeStyles";
 import { serviceAxiosApi } from "../../services/serviceAxiosApi";
+import Icon from "react-native-vector-icons/MaterialIcons";
 
 enum UserType {
   Admin = "admin",
@@ -62,11 +63,6 @@ const ParentHome = ({ navigation }: { navigation: any }) => {
     }
   };
 
-  const handleReload = () => {
-    setLoading(true);
-    fetchProfile();
-  };
-
   const handleAccountingAlert = () => {
     Alert.alert("Próximamente. en desarrollo", "Esta funcionalidad estará disponible pronto.");
   };
@@ -85,45 +81,38 @@ const ParentHome = ({ navigation }: { navigation: any }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Ícono de notificaciones en la esquina superior derecha */}
+      <TouchableOpacity
+        style={{ position: "absolute", top: 10, right: 10 }}
+        onPress={() => navigation.navigate("NotificationsScreen")}
+      >
+        <Icon name="notifications" size={30} color={COLORS.black} />
+      </TouchableOpacity>
+
       {/* Saludo en la parte superior */}
       <Text style={styles.title}>{user?.name ? `Hola ${user.name} !` : "Mi perfil!"}</Text>
-      
+
       {/* Contenedor para los botones adicionales */}
       <View style={styles.verticalButtonContainer}>
-        {/* Botón Contabilidad */}
-        <TouchableOpacity onPress={handleAccountingAlert} style={styles.editButton}>
-          <Text style={{ fontSize: 16, color: COLORS.white }}>Contabilidad</Text>
+        <TouchableOpacity onPress={() => navigation.navigate("TransbankHome")} style={styles.editButton}>
+          <Text style={{ fontSize: 16, color: COLORS.white }}>Pagar Mensualidad</Text>
         </TouchableOpacity>
-
-        {/* Botón Calificaciones Pupilo */}
         <TouchableOpacity onPress={() => navigation.navigate("ParentGrades")} style={styles.editButton}>
           <Text style={{ fontSize: 16, color: COLORS.white }}>Calificaciones Pupilo(s)</Text>
         </TouchableOpacity>
-
-        {/* Botón Asistencia */}
         <TouchableOpacity onPress={() => navigation.navigate("ParentAttendance")} style={styles.editButton}>
           <Text style={{ fontSize: 16, color: COLORS.white }}>Asistencia Pupilo(s)</Text>
         </TouchableOpacity>
-
-        {/* Botón Horario */}
         <TouchableOpacity onPress={() => navigation.navigate("ParentHorario")} style={styles.editButton}>
           <Text style={{ fontSize: 16, color: COLORS.white }}>Horario Pupilo(s)</Text>
         </TouchableOpacity>
-
-        {/* Botón Chat */}
-        <TouchableOpacity 
-          onPress={() => navigation.navigate("ParentChildrenList")} 
-          style={styles.editButton}
-        >
+        <TouchableOpacity onPress={() => navigation.navigate("ParentChildrenList")} style={styles.editButton}>
           <Text style={{ fontSize: 16, color: COLORS.white }}>Chat</Text>
         </TouchableOpacity>
       </View>
 
       {/* Contenedor para los botones en la parte inferior */}
       <View style={styles.buttonContainer}>
-        {/* <TouchableOpacity onPress={handleReload} style={styles.simpleButton}>
-          <Text style={{ fontSize: 16, color: COLORS.primary }}>Recargar</Text>
-        </TouchableOpacity> */}
         <TouchableOpacity onPress={handleLogout} style={styles.simpleButton}>
           <Text style={{ fontSize: 16, color: COLORS.primary }}>Cerrar Sesión</Text>
         </TouchableOpacity>

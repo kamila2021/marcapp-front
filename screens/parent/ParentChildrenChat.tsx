@@ -155,26 +155,51 @@ const ParentChildrenChat = () => {
         <Text style={styles.noProfessorsText}>No se encuentran profesores para chatear.</Text>
       )}
 
-      {selectedProfessor && (
-        <View style={{ flex: 1, paddingTop: 20 }}>
-          <FlatList
-            data={messages}
-            renderItem={({ item }) => (
-                <Text style={{ color: item.senderId == selectedChildId ? 'blue' : 'green' }}>
-                {item.message} - {new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </Text>
-            )}
-            keyExtractor={(item, index) => index.toString()}
-          />
-          <TextInput
-            value={message}
-            onChangeText={setMessage}
-            placeholder="Escribe un mensaje"
-            style={{ borderWidth: 1, padding: 10, marginVertical: 10 }}
-          />
-          <Button title="Enviar" onPress={handleSendMessage} />
+{selectedProfessor && (
+  <View style={{ flex: 1, paddingTop: 20 }}>
+    <FlatList
+      data={messages}
+      renderItem={({ item }) => (
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: item.senderId == selectedChildId ? 'flex-end' : 'flex-start', // Alinea a la derecha o izquierda
+            marginVertical: 5,
+          }}
+        >
+          <View
+            style={{
+              maxWidth: '70%', // Limita el ancho del mensaje
+              backgroundColor: item.senderId == selectedChildId ? '#d1e7ff' : '#d4f9d4', // Azul para el remitente, verde para el receptor
+              padding: 10,
+              borderRadius: 10,
+            }}
+          >
+            <Text style={{ color: '#000' }}>
+              {item.message}
+            </Text>
+            <Text style={{ fontSize: 10, textAlign: 'right', color: '#555' }}>
+              {new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </Text>
+          </View>
         </View>
       )}
+      keyExtractor={(item, index) => index.toString()}
+    />
+    <TextInput
+      value={message}
+      onChangeText={setMessage}
+      placeholder="Escribe un mensaje"
+      style={{
+        borderWidth: 1,
+        padding: 10,
+        marginVertical: 10,
+        borderRadius: 10,
+      }}
+    />
+    <Button title="Enviar" onPress={handleSendMessage} />
+  </View>
+)}
     </View>
   );
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Login from './screens/user/Login';  
@@ -28,9 +28,30 @@ import ParentHorario from './screens/parent/ParentHorario';
 import ParentChildrenList from './screens/parent/ParentChildrenChat';
 import ChatWithProfessor from './screens/chat/ChatWithProfessor';
 import ProfessorChat from './screens/professor/ProfessorChat';
+import TransbankHome from './screens/transbank/TransbankHome';
+import NotificationsScreen from './screens/user/Notifications';
+import {OneSignal} from 'react-native-onesignal';
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+   // Remove this method to stop OneSignal Debugging
+   //OneSignal.SetLogLevel(OneSignal.LOG_LEVEL.DEBUG, OneSignal.LOG_LEVEL.DEBUG)
+   
+   // OneSignal Initialization
+   OneSignal.initialize("1d4c09bc-73a5-4063-97ee-58a042ecbf21");
+ 
+   // requestPermission will show the native iOS or Android notification permission prompt.
+   // We recommend removing the following code and instead using an In-App Message to prompt for notification permission
+   OneSignal.Notifications.requestPermission(true);
+ 
+   // Method for listening for notification clicks
+   OneSignal.Notifications.addEventListener('click', (event) => {
+     console.log('OneSignal: notification clicked:', event);
+   });
+
+
+   
  
   return (
     <NavigationContainer>
@@ -222,6 +243,20 @@ export default function App() {
         <Stack.Screen
           name="ProfessorChat"
           component={ProfessorChat}
+          options={{
+            headerShown: false
+          }}
+        />
+         <Stack.Screen
+          name="TransbankHome"
+          component={TransbankHome}
+          options={{
+            headerShown: false
+          }}
+        />
+         <Stack.Screen
+          name="NotificationsScreen"
+          component={NotificationsScreen}
           options={{
             headerShown: false
           }}

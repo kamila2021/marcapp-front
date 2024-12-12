@@ -170,12 +170,27 @@ const handleSubjectChange = (itemValue) => {
       </Picker>
 
       <Text style={styles.title}>Mensajes:</Text>
-<FlatList
+      <FlatList
   data={messages}
   renderItem={({ item }) => (
-    <Text style={styles.message}>
-      {item.senderId != professor?.id ? 'Apoderado' : professor?.name}: {item.message}
-    </Text>
+    <View
+      style={[
+        styles.messageContainer,
+        item.senderId == professor?.id ? styles.messageSent : styles.messageReceived,
+      ]}
+    >
+      <Text
+        style={[
+          styles.messageText,
+          { color: '#000' },
+        ]}
+      >
+        {item.message}
+      </Text>
+      <Text style={styles.timestamp}>
+        {new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+      </Text>
+    </View>
   )}
   keyExtractor={(item, index) => index.toString()}
 />
@@ -219,6 +234,31 @@ const styles = StyleSheet.create({
     marginVertical: 2,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
+  },
+  messageContainer: {
+    maxWidth: '70%',
+    padding: 10,
+    marginVertical: 5,
+    borderRadius: 10,
+  },
+  messageSent: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#d1e7ff',
+    borderBottomRightRadius: 0,
+  },
+  messageReceived: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#d4f9d4',
+    borderBottomLeftRadius: 0,
+  },
+  messageText: {
+    fontSize: 16,
+  },
+  timestamp: {
+    fontSize: 10,
+    textAlign: 'right',
+    marginTop: 5,
+    color: '#888',
   },
 });
 

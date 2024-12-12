@@ -5,6 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import COLORS from "../../constants/colors";
 import styles from "../../assets/styles/HomeStyles";
 import { serviceAxiosApi } from "../../services/serviceAxiosApi";
+import Icon from "react-native-vector-icons/MaterialIcons";
 
 enum UserType {
   Admin = "admin",
@@ -87,6 +88,13 @@ const StudentHome = ({ navigation }: { navigation: any }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Ícono de notificaciones en la esquina superior derecha */}
+      <TouchableOpacity
+        style={{ position: "absolute", top: 10, right: 10 }}
+        onPress={() => navigation.navigate("NotificationsScreen")}
+      >
+        <Icon name="notifications" size={30} color={COLORS.black} />
+      </TouchableOpacity>
       {/* Saludo en la parte superior */}
       <Text style={styles.title}>{user?.name ? `Hola ${user.name} !` : "Mi perfil!"}</Text>
       
