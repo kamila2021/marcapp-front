@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "632713761853",
+    "project_id": "t-pulsar-426719-e5",
+    "storage_bucket": "t-pulsar-426719-e5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:632713761853:android:699c706ea7f3deb6d88654",
+        "android_client_info": {
+          "package_name": "front.login"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8XwxK2x83lUJf3rRgiqcndT8VdxRrRRo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
